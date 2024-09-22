@@ -1,0 +1,6 @@
+wsx:
+  http:
+    port: 4001
+  logger:
+    enable: true
+  
