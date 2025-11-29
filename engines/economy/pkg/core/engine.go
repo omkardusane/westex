@@ -89,6 +89,11 @@ func (e *Engine) processTick() {
 	// Phase 3: Product market - people buy products
 	e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
 	tradeLogs := market.ProcessProductMarket(e.Region, e.PricePerUnit)
+	// tradeLogsSummary := make([]string, 0)
+	// for _, tradeLogItem := range tradeLogs {
+	// 	tradeLogItem
+	// }
+	// e.Logger.LogEvents(tradeLogsSummary)
 	e.Logger.LogEvents(tradeLogs)
 
 	// Phase 4: Reset labor hours for next tick
@@ -102,7 +107,7 @@ func (e *Engine) processProduction() []string {
 	for _, industry := range e.Region.Industries {
 		for _, product := range industry.OutputProducts {
 			product.Add(e.ProductionRate)
-			logs = append(logs, fmt.Sprintf("✓ %s produced %.2f %s",
+			logs = append(logs, fmt.Sprintf("✓ %s produced %.2f units of %s",
 				industry.Name, e.ProductionRate, product.Name))
 		}
 	}

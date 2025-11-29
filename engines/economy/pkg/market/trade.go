@@ -31,7 +31,7 @@ func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, 
 
 	// Check if industry has enough product
 	if product.Quantity < quantity {
-		return false, fmt.Sprintf("Industry %s doesn't have enough %s (has %.2f, needs %.2f)", 
+		return false, fmt.Sprintf("Industry %s doesn't have enough %s (has %.2f, needs %.2f)",
 			seller.Name, productName, product.Quantity, quantity)
 	}
 
@@ -39,7 +39,7 @@ func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, 
 
 	// Check if buyer can afford it
 	if buyer.Money < totalPrice {
-		return false, fmt.Sprintf("Person %s cannot afford %.2f %s (costs %.2f, has %.2f)", 
+		return false, fmt.Sprintf("Person %s cannot afford %.2f %s (costs %.2f, has %.2f)",
 			buyer.Name, quantity, productName, totalPrice, buyer.Money)
 	}
 
@@ -48,18 +48,18 @@ func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, 
 	seller.Money += totalPrice
 	product.Quantity -= quantity
 
-	return true, fmt.Sprintf("✓ %s bought %.2f %s from %s for %.2f", 
+	return true, fmt.Sprintf("✓ %s bought %.2f %s from %s for %.2f",
 		buyer.Name, quantity, productName, seller.Name, totalPrice)
 }
 
 // ProcessProductMarket simulates people buying products to solve their problems
 func ProcessProductMarket(region *entities.Region, pricePerUnit float64) []string {
 	logs := make([]string, 0)
-	
+	var summary map[string]float64 = make(map[string]float64)
 	// For each person, try to buy products that solve their problems
 	for _, person := range region.People {
 		problems := person.GetAllProblems()
-		
+		summary["transactions.people"] += 1
 		for _, problem := range problems {
 			// Find industries that solve this problem
 			for _, industry := range region.Industries {
@@ -69,8 +69,12 @@ func ProcessProductMarket(region *entities.Region, pricePerUnit float64) []strin
 						for _, product := range industry.OutputProducts {
 							// Buy a small amount based on problem severity
 							quantityToBuy := problem.Severity * 10.0
-							
+
 							success, log := ExecuteTradeTransaction(person, industry, product.Name, quantityToBuy, pricePerUnit)
+
+							summary[product.Name+".qty"] += quantityToBuy
+							summary[product.Name+".cost"] += pricePerUnit * quantityToBuy
+							summary["transactions.count"] += 1
 							if success {
 								logs = append(logs, log)
 							}
@@ -80,6 +84,15 @@ func ProcessProductMarket(region *entities.Region, pricePerUnit float64) []strin
 			}
 		}
 	}
-	
+	// convert summary into a log statement and append to log
+	summaryLog := fmt.Sprintf("Market Summary - People: %.0f, Transactions: %.0f",
+		summary["transactions.people"], summary["transactions.count"])
+	for key, value := range summary {
+		if key != "transactions.people" && key != "transactions.count" {
+			summaryLog += fmt.Sprintf(" | %s: %.2f", key, value)
+		}
+	}
+	logs = append(make([]string, 0), summaryLog)
+
 	return logs
 }

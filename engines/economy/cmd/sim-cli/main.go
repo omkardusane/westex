@@ -22,7 +22,7 @@ func main() {
 	// Create industries using builder pattern
 	// Industry 1: Food Production (solves food problem)
 	foodProduct := entities.NewResource("Food", 100.0, "kg")
-	foodIndustry := entities.CreateIndustry("FarmCo").
+	foodIndustry := entities.CreateIndustry("Farm Ind").
 		SetupIndustry([]*entities.Problem{foodProblem}, nil, []*entities.Resource{foodProduct}).
 		UpdateIndustryRates(200.0, 1.0, 10000.0)
 	region.AddIndustry(foodIndustry)
@@ -43,7 +43,7 @@ func main() {
 
 	// Create 100 people
 	for i := 1; i <= 20; i++ {
-		person := entities.NewPerson(fmt.Sprintf("Person-%d", i), 500.0, 8.0)
+		person := entities.NewPerson(fmt.Sprintf("Person-%d", i), 50.0, 8.0)
 		person.AddSegment(workersSegment)
 		region.AddPerson(person)
 	}
@@ -57,5 +57,5 @@ func main() {
 	)
 
 	// Run for 10 ticks
-	engine.Run(10)
+	engine.Run(3)
 }
