@@ -8,6 +8,18 @@ import (
 	"westex/engines/economy/pkg/market"
 )
 
+type SimulationConfig struct {
+	Ticks                    int
+	WagePerHour              float32
+	ConsumptionFactorPerWeek float32
+}
+
+var SimConf = SimulationConfig{
+	Ticks:                    5,
+	WagePerHour:              10.0,
+	ConsumptionFactorPerWeek: 1.0,
+}
+
 // Engine is the core simulation engine
 type Engine struct {
 	Region         *entities.Region
@@ -26,7 +38,7 @@ type InitialState struct {
 	TotalWealth   float64
 }
 
-func createNewEngine(region *entities.Region) *Engine {
+func CreateNewEngine(region *entities.Region) *Engine {
 	thisEngine := &Engine{
 		Region:      region,
 		Logger:      logging.NewLogger(true),
@@ -71,12 +83,11 @@ func (e *Engine) Run(ticks int) {
 	fmt.Printf("Region: %s\n", e.Region.Name)
 	fmt.Printf("Industries: %d, People: %d, Problems: %d\n",
 		len(e.Region.Industries), len(e.Region.People), len(e.Region.Problems))
-	fmt.Printf("Initial Total Wealth: $%.2f\n\n", e.InitialState.TotalWealth)
 
 	for i := 0; i < ticks; i++ {
 		e.CurrentTick = i + 1
 		e.processTick()
-		time.Sleep(500 * time.Millisecond) // Slow down for readability
+		time.Sleep(200 * time.Millisecond) // Slow down for readability
 	}
 
 	e.printFinalSummary()
@@ -85,10 +96,12 @@ func (e *Engine) Run(ticks int) {
 // processTick handles one simulation tick
 func (e *Engine) processTick() {
 	e.Logger.LogTick(e.CurrentTick)
+	weeks := 1
+	hours := float32(weeks * 40) // Assuming 40-hour work weeks
 
 	// Phase 1: Industries produce goods
 	e.Logger.LogEvent("📦 PRODUCTION PHASE")
-	productionLogs := e.processProduction()
+	productionLogs := e.processProduction(hours)
 	e.Logger.LogEvents(productionLogs)
 
 	// Phase 2: Labor market - people work for industries
@@ -99,11 +112,6 @@ func (e *Engine) processTick() {
 	// Phase 3: Product market - people buy products
 	e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
 	tradeLogs := market.ProcessProductMarket(e.Region, e.PricePerUnit)
-	// tradeLogsSummary := make([]string, 0)
-	// for _, tradeLogItem := range tradeLogs {
-	// 	tradeLogItem
-	// }
-	// e.Logger.LogEvents(tradeLogsSummary)
 	e.Logger.LogEvents(tradeLogs)
 
 	// Phase 4: Reset labor hours for next tick
@@ -111,14 +119,26 @@ func (e *Engine) processTick() {
 }
 
 // processProduction simulates industries producing goods
-func (e *Engine) processProduction() []string {
+func (e *Engine) processProduction(hours float32) []string {
 	logs := make([]string, 0)
-
 	for _, industry := range e.Region.Industries {
+		var LaborEmployed float32 = float32(0.3) * float32(len(e.Region.People)) // 30% of population employed
+		var productionTargets map[string]float32                                 // consumer need
+		var totalProductionNeed float32
+		//hours / industry.LaborNeeded
+		for _, problem := range industry.OwnedProblems {
+			peopleNeedingProduct := float32(len(e.Region.People)) * float32(problem.Demand)
+			productionTargets[problem.Name] = peopleNeedingProduct // estimated need
+			totalProductionNeed += peopleNeedingProduct
+		}
 		for _, product := range industry.OutputProducts {
-			product.Add(e.ProductionRate)
+			// product.Add(e.ProductionRate)
+			// productionPerPerson := float32(1.0) //unit per person
+			// productionTarget := float32(totalProductionNeed) * productionPerPerson
+			productionPossiblePerTick := float32(LaborEmployed * hours / industry.LaborNeeded) // units per tick
+			produced := productionPossiblePerTick
 			logs = append(logs, fmt.Sprintf("✓ %s produced %.2f units of %s",
-				industry.Name, e.ProductionRate, product.Name))
+				industry.Name, produced, product.Name))
 		}
 	}
 

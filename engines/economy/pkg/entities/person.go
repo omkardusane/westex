@@ -58,5 +58,5 @@ func (p *Person) GetAllProblems() []*Problem {
 }
 
 func (s *PopulationSegment) UpdateSize(size int) {
-
+	s.Size = size
 }

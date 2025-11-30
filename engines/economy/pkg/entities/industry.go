@@ -8,8 +8,9 @@ type Industry struct {
 	OutputProducts  []*Resource // Products produced
 	LaborNeeded     float32     // Hours of labor needed per time unit
 	ConsumptionRate float32     // Rate at which input resources are consumed per unit labor week
-	ProductionRate  float32     // Rate at which output products are produced per unit labor week
+	ProductionRate  float32     // Rate at which output products are produced per unit labor hour
 	Money           float32     // Money owned by the industry
+	LaborEmployed   float32     // Number of laborers employed per tick
 }
 
 // CreateIndustry sets up the industry with name and returns a new Industry instance

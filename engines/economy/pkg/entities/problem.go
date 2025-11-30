@@ -23,6 +23,6 @@ func (p *Problem) getName() string {
 	return p.Name
 }
 
-func (p *Problem) updateDemand(demand float32) {
+func (p *Problem) UpdateDemand(demand float32) {
 	p.Demand = demand
 }

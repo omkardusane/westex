@@ -2,21 +2,23 @@ package entities
 
 // Region represents a geographic/economic area containing all entities
 type Region struct {
-	Name       string
-	Industries []*Industry
-	People     []*Person
-	Resources  []*Resource // Shared/available resources in the region
-	Problems   []*Problem  // All problems present in the region
+	Name               string
+	Industries         []*Industry
+	People             []*Person
+	PopulationSegments []*PopulationSegment // Different segments of the population
+	Resources          []*Resource          // Shared/available resources in the region
+	Problems           []*Problem           // All problems present in the region
 }
 
 // NewRegion creates a new Region instance
 func NewRegion(name string) *Region {
 	return &Region{
-		Name:       name,
-		Industries: make([]*Industry, 0),
-		People:     make([]*Person, 0),
-		Resources:  make([]*Resource, 0),
-		Problems:   make([]*Problem, 0),
+		Name:               name,
+		Industries:         make([]*Industry, 0),
+		People:             make([]*Person, 0),
+		Resources:          make([]*Resource, 0),
+		Problems:           make([]*Problem, 0),
+		PopulationSegments: make([]*PopulationSegment, 0),
 	}
 }
 
@@ -28,6 +30,10 @@ func (r *Region) AddIndustry(industry *Industry) {
 // AddPerson adds a person to the region
 func (r *Region) AddPerson(person *Person) {
 	r.People = append(r.People, person)
+}
+
+func (r *Region) AddPopulationSegment(pSeg *PopulationSegment) {
+	r.PopulationSegments = append(r.PopulationSegments, pSeg)
 }
 
 // AddResource adds a resource to the region

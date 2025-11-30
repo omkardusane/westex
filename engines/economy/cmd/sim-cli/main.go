@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	sim1()
+	sim2()
 
 }
 
@@ -26,17 +26,18 @@ func sim2() {
 	// region.AddProblem(entertainmentProblem)
 	// Create industries using builder pattern
 
+	rawMaterial := entities.NewResource("RawMaterial", "units")
 	// Industry 1: Food Production (solves food problem)
 	foodProduct := entities.NewResource("Food", "kg")
 	foodIndustry := entities.CreateIndustry("Agriculture Industry").
-		SetupIndustry([]*entities.Problem{foodProblem}, nil, []*entities.Resource{foodProduct})
+		SetupIndustry([]*entities.Problem{foodProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{foodProduct})
 	region.AddIndustry(foodIndustry)
 
 	// Industry 2: Healthcare Services (solves healthcare problem)
 	wellnessServices := entities.NewResource("Wellness", "visits")
 	healthcareServices := entities.NewResource("Medical", "treatments")
 	healthcareIndustry := entities.CreateIndustry("Health Industry").
-		SetupIndustry([]*entities.Problem{healthCareProblem}, nil, []*entities.Resource{wellnessServices, healthcareServices})
+		SetupIndustry([]*entities.Problem{healthCareProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{wellnessServices, healthcareServices})
 	region.AddIndustry(healthcareIndustry)
 
 	// Create population segments
@@ -50,14 +51,15 @@ func sim2() {
 		Problems: []*entities.Problem{foodProblem, healthCareProblem},
 		Size:     1000,
 	}
-
+	region.AddPopulationSegment(workersPopulation)
+	region.AddPopulationSegment(generalPopulationSegment)
 	// Create 1000 people
 	workersCount := 0
 	for i := 1; i <= generalPopulationSegment.Size; i++ {
 		person := entities.NewPerson(fmt.Sprintf("Person-%d", i), 50.0, 8.0)
 		person.AddSegment(generalPopulationSegment)
 		// probabilistically assign to workers segment
-		if utils.ProbableChance(0.2) {
+		if utils.ProbableChance(float32(workersPopulation.Size) / float32(generalPopulationSegment.Size)) {
 			person.AddSegment(workersPopulation)
 			workersCount++
 		}
@@ -74,9 +76,12 @@ func sim2() {
 		Goals of industries: to produce food for 1000 people and healthcare for 1000 people
 	*/
 	// Create and run the simulation engine
-	engine := core.NewEngine(
-		region,
-	)
+	healthCareProblem.UpdateDemand(0.1)
+	foodProblem.UpdateDemand(0.99)
+	engine := core.CreateNewEngine(region)
+	engine.Run(3)
+	// set production parameters
+	// engine.
 }
 
 func sim1() {
