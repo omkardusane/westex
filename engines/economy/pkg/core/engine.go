@@ -26,6 +26,16 @@ type InitialState struct {
 	TotalWealth   float64
 }
 
+func createNewEngine(region *entities.Region) *Engine {
+	thisEngine := &Engine{
+		Region:      region,
+		Logger:      logging.NewLogger(true),
+		CurrentTick: 0,
+	}
+
+	return thisEngine
+}
+
 // NewEngine creates a new simulation engine
 func NewEngine(region *entities.Region, wagePerHour, pricePerUnit, productionRate float64) *Engine {
 	// Capture initial state

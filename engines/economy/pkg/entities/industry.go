@@ -3,13 +3,13 @@ package entities
 // Industry represents a business entity that produces goods/services
 type Industry struct {
 	Name            string
-	OwnedProblems   []*Problem   // Problems this industry solves (1-2 problems)
-	InputResources  []*Resource  // Resources needed for production
-	OutputProducts  []*Resource  // Products produced
-	LaborNeeded     float64      // Hours of labor needed per time unit
-	ConsumptionRate float64      // Rate at which input resources are consumed per unit labor week
-	ProductionRate  float64      // Rate at which output products are produced per unit labor week
-	Money           float64      // Money owned by the industry
+	OwnedProblems   []*Problem  // Problems this industry solves (1-2 problems)
+	InputResources  []*Resource // Resources needed for production
+	OutputProducts  []*Resource // Products produced
+	LaborNeeded     float32     // Hours of labor needed per time unit
+	ConsumptionRate float32     // Rate at which input resources are consumed per unit labor week
+	ProductionRate  float32     // Rate at which output products are produced per unit labor week
+	Money           float32     // Money owned by the industry
 }
 
 // CreateIndustry sets up the industry with name and returns a new Industry instance
@@ -32,15 +32,27 @@ func (i *Industry) SetupIndustry(problems []*Problem, inputs []*Resource, output
 }
 
 // UpdateIndustryRates sets LaborNeeded, ConsumptionRate, ProductionRate
-func (i *Industry) UpdateIndustryRates(laborNeeded, consumptionRate, productionRate float64) *Industry {
+func (i *Industry) UpdateIndustryRates(laborNeeded, consumptionRate, productionRate float32) *Industry {
 	i.LaborNeeded = laborNeeded
 	i.ConsumptionRate = consumptionRate
 	i.ProductionRate = productionRate
 	return i
 }
 
+func (i *Industry) UpdateLabor(laborNeeded float32) {
+	i.LaborNeeded = laborNeeded
+}
+
+func (i *Industry) UpdateConsumptionRate(consumptionRate float32) {
+	i.ConsumptionRate = consumptionRate
+}
+
+func (i *Industry) UpdateProductionrate(productionRate float32) {
+	i.ProductionRate = productionRate
+}
+
 // UpdateIndustryMoney updates the industry's cash balance
-func (i *Industry) UpdateIndustryMoney(amount float64) *Industry {
+func (i *Industry) UpdateIndustryMoney(amount float32) *Industry {
 	i.Money += amount
 	return i
 }

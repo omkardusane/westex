@@ -49,10 +49,14 @@ func (p *Person) GetAllProblems() []*Problem {
 			problemMap[problem.Name] = problem
 		}
 	}
-	
+
 	problems := make([]*Problem, 0, len(problemMap))
 	for _, problem := range problemMap {
 		problems = append(problems, problem)
 	}
 	return problems
+}
+
+func (s *PopulationSegment) UpdateSize(size int) {
+
 }
