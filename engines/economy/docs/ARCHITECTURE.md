@@ -243,9 +243,9 @@ func TestEngine_Run(t *testing.T) {
 func TestCalculateWage(t *testing.T) {
     tests := []struct {
         name     string
-        hours    float64
-        rate     float64
-        expected float64
+        hours    float32
+        rate     float32
+        expected float32
     }{
         {"standard", 8.0, 10.0, 80.0},
         {"overtime", 10.0, 15.0, 150.0},

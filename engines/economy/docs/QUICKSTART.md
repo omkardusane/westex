@@ -216,7 +216,7 @@ func (e *Engine) processProduction() []string {
 import "math/rand"
 
 // In processTick(), add:
-if rand.Float64() < 0.1 {  // 10% chance
+if rand.float32() < 0.1 {  // 10% chance
     e.Logger.LogEvent("🌪️  Natural disaster! Production halved this tick.")
     e.ProductionRate *= 0.5
 }

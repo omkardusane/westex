@@ -9,7 +9,6 @@ import (
 
 func main() {
 	sim2()
-
 }
 
 func sim2() {
@@ -30,14 +29,16 @@ func sim2() {
 	// Industry 1: Food Production (solves food problem)
 	foodProduct := entities.NewResource("Food", "kg")
 	foodIndustry := entities.CreateIndustry("Agriculture Industry").
-		SetupIndustry([]*entities.Problem{foodProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{foodProduct})
+		SetupIndustry([]*entities.Problem{foodProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{foodProduct}).
+		UpdateLabor(float32(4.0))
 	region.AddIndustry(foodIndustry)
 
 	// Industry 2: Healthcare Services (solves healthcare problem)
 	wellnessServices := entities.NewResource("Wellness", "visits")
 	healthcareServices := entities.NewResource("Medical", "treatments")
 	healthcareIndustry := entities.CreateIndustry("Health Industry").
-		SetupIndustry([]*entities.Problem{healthCareProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{wellnessServices, healthcareServices})
+		SetupIndustry([]*entities.Problem{healthCareProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{wellnessServices, healthcareServices}).
+		UpdateLabor(float32(10))
 	region.AddIndustry(healthcareIndustry)
 
 	// Create population segments
