@@ -52,7 +52,7 @@ func NewRegion() *Region { }
 
 // Unexported (private) - starts with lowercase
 type internalCache struct { }
-func calculateTotal() float64 { }
+func calculateTotal() float32 { }
 ```
 
 ---
@@ -90,7 +90,7 @@ const (
 ```go
 // Numbers
 var i int = 42
-var f float64 = 3.14
+var f float32 = 3.14
 var u uint = 100
 
 // Strings
@@ -109,7 +109,7 @@ var p *int = &i
 
 ```go
 var i int = 42
-var f float64 = float64(i)
+var f float32 = float32(i)
 var u uint = uint(i)
 ```
 
@@ -123,7 +123,7 @@ var u uint = uint(i)
 type Person struct {
     Name       string      // Exported field
     age        int         // Unexported field
-    Money      float64
+    Money      float32
     Segments   []*Segment  // Slice of pointers
 }
 ```
@@ -132,7 +132,7 @@ type Person struct {
 
 ```go
 // Constructor function (convention: NewTypeName)
-func NewPerson(name string, money, laborHours float64) *Person {
+func NewPerson(name string, money, laborHours float32) *Person {
     return &Person{
         Name:       name,
         Money:      money,
@@ -156,12 +156,12 @@ func (p *Person) SetName(name string) {
 }
 
 // Method with return value
-func (p Person) CanAfford(amount float64) bool {
+func (p Person) CanAfford(amount float32) bool {
     return p.Money >= amount
 }
 
 // Method with error return
-func (p *Person) SpendMoney(amount float64) error {
+func (p *Person) SpendMoney(amount float32) error {
     if !p.CanAfford(amount) {
         return fmt.Errorf("insufficient funds")
     }
@@ -566,9 +566,9 @@ func TestPerson_CanAfford(t *testing.T) {
 func TestCalculateWage(t *testing.T) {
     tests := []struct {
         name     string
-        hours    float64
-        rate     float64
-        expected float64
+        hours    float32
+        rate     float32
+        expected float32
     }{
         {"standard", 8.0, 10.0, 80.0},
         {"overtime", 12.0, 10.0, 120.0},
@@ -633,7 +633,7 @@ func BenchmarkProcessProduction(b *testing.B) {
 ### Constructor Pattern
 
 ```go
-func NewPerson(name string, money float64) *Person {
+func NewPerson(name string, money float32) *Person {
     return &Person{
         Name:     name,
         Money:    money,
@@ -653,7 +653,7 @@ func WithLogger(logger Logger) Option {
     }
 }
 
-func WithWageRate(rate float64) Option {
+func WithWageRate(rate float32) Option {
     return func(e *Engine) {
         e.WagePerHour = rate
     }

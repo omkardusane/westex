@@ -6,7 +6,6 @@ import (
 	"time"
 	"westex/engines/economy/pkg/entities"
 	"westex/engines/economy/pkg/logging"
-	"westex/engines/economy/pkg/market"
 )
 
 type SimulationConfig struct {
@@ -26,25 +25,24 @@ type Engine struct {
 	Region         *entities.Region
 	Logger         *logging.Logger
 	CurrentTick    int
-	WagePerHour    float64 // Standard wage rate
-	PricePerUnit   float64 // Standard price per unit of product
-	ProductionRate float64 // How much each industry produces per tick
+	WagePerHour    float32 // Standard wage rate
+	PricePerUnit   float32 // Standard price per unit of product
+	ProductionRate float32 // How much each industry produces per tick
 	InitialState   *InitialState
 }
 
 type TickData struct {
 	TickNumber       int
-	WeeksCount	  int
+	WeeksCount       int
 	ProducedGoods    []ProducedGoods
 	LaborEmployments []LaborEmployment
-
 }
 
 // InitialState captures the starting state of the economy
 type InitialState struct {
-	IndustryMoney map[string]float64
-	PersonMoney   map[string]float64
-	TotalWealth   float64
+	IndustryMoney map[string]float32
+	PersonMoney   map[string]float32
+	TotalWealth   float32
 }
 
 func CreateNewEngine(region *entities.Region) *Engine {
@@ -58,18 +56,18 @@ func CreateNewEngine(region *entities.Region) *Engine {
 }
 
 // NewEngine creates a new simulation engine
-func NewEngine(region *entities.Region, wagePerHour, pricePerUnit, productionRate float64) *Engine {
+func NewEngine(region *entities.Region, wagePerHour, pricePerUnit, productionRate float32) *Engine {
 	// Capture initial state
 	initialState := &InitialState{
-		IndustryMoney: make(map[string]float64),
-		PersonMoney:   make(map[string]float64),
+		IndustryMoney: make(map[string]float32),
+		PersonMoney:   make(map[string]float32),
 		TotalWealth:   0,
 	}
 
-	for _, ind := range region.Industries {
-		initialState.IndustryMoney[ind.Name] = ind.Money
-		initialState.TotalWealth += ind.Money
-	}
+	// for _, ind := range region.Industries {
+	// 	initialState.IndustryMoney[ind.Name] = ind.Money
+	// 	initialState.TotalWealth += ind.Money
+	// }
 	for _, p := range region.People {
 		initialState.PersonMoney[p.Name] = p.Money
 		initialState.TotalWealth += p.Money
@@ -108,27 +106,27 @@ func (e *Engine) processTick() {
 	weeks := 4                   // Assuming each tick represents 4 weeks
 	hours := float32(weeks * 40) // Assuming 40-hour work weeks
 	TickContext := TickData{
-		TickNumber:    e.CurrentTick,
+		TickNumber: e.CurrentTick,
 		WeeksCount: weeks,
 	}
 
 	// Phase 1: Industries produce goods
 	e.Logger.LogEvent("📦 PRODUCTION PHASE")
-	TickContext.ProducedGoods := e.processProduction(hours)
+	TickContext.ProducedGoods = e.processProduction(hours)
 	// e.Logger.LogEvents(productionLogs)
 
 	// Phase 2: Labor market - people work for industries
-	e.Logger.LogEvent("\n💼 LABOR MARKET PHASE")
-	laborLogs := market.ProcessLaborMarket(e.Region, e.WagePerHour)
-	e.Logger.LogEvents(laborLogs)
+	// e.Logger.LogEvent("\n💼 LABOR MARKET PHASE")
+	// laborLogs := market.ProcessLaborMarket(e.Region, e.WagePerHour)
+	// e.Logger.LogEvents(laborLogs)
 
-	// Phase 3: Product market - people buy products
-	e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
-	tradeLogs := market.ProcessProductMarket(e.Region, e.PricePerUnit)
-	e.Logger.LogEvents(tradeLogs)
+	// // Phase 3: Product market - people buy products
+	// e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
+	// tradeLogs := market.ProcessProductMarket(e.Region, e.PricePerUnit)
+	// e.Logger.LogEvents(tradeLogs)
 
-	// Phase 4: Reset labor hours for next tick
-	e.resetLaborHours()
+	// // Phase 4: Reset labor hours for next tick
+	// e.resetLaborHours()
 }
 
 type ProducedGoods struct {
@@ -157,9 +155,9 @@ func (e *Engine) processProduction(hours float32) []ProducedGoods {
 		LaborUtilized := LaborEmployment{
 			IndustryName: industry.Name,
 		}
-		var LaborEmployed float32 = float32(0.3 * ) * float32(len(e.Region.People)) // 30% of population employed
+		var LaborEmployed float32 = float32(0.3*rand.Float32()) * float32(len(e.Region.People)) // 30% of population employed
 		LaborUtilized.Quantity = LaborEmployed
-		var productionTargets map[string]float32 // consumer need
+		var productionTargets map[string]float32 = make(map[string]float32) // consumer need
 		//var totalProductionNeed float32
 		//hours / industry.LaborNeeded
 		for _, problem := range industry.OwnedProblems {
@@ -173,7 +171,7 @@ func (e *Engine) processProduction(hours float32) []ProducedGoods {
 			// product.Add(e.ProductionRate)
 			// productionPerPerson := float32(1.0) //unit per person
 			// productionTarget := float32(pGoods.productionTarget) * productionPerPerson
-			pGoods.ProductionRate = float32(LaborEmployed / industry.LaborNeeded)
+			pGoods.ProductionRate = float32(LaborUtilized.Quantity / industry.LaborNeeded)
 			pGoods.Quantity = float32(pGoods.ProductionRate * hours) // units per tick
 			// produced := productionPossiblePerTick
 			logIt(fmt.Sprintf("✓ %s produced %.2f units of %s",
@@ -201,7 +199,7 @@ func (e *Engine) printFinalSummary() {
 	fmt.Printf("🏭 INDUSTRIES:\n")
 	for _, industry := range e.Region.Industries {
 		start := e.InitialState.IndustryMoney[industry.Name]
-		change := industry.Money - start
+		change := 0 //industry.Money - start
 		fmt.Printf("  %s:\n", industry.Name)
 		fmt.Printf("    Money: $%.2f (Start: $%.2f, Change: %+.2f)\n", industry.Money, start, change)
 		fmt.Printf("    Products:\n")
@@ -223,13 +221,13 @@ func (e *Engine) printFinalSummary() {
 	}
 
 	// Calculate total wealth
-	totalWealth := 0.0
+	totalWealth := float32(0.0)
 	for _, person := range e.Region.People {
 		totalWealth += person.Money
 	}
-	for _, industry := range e.Region.Industries {
-		totalWealth += industry.Money
-	}
+	// for _, industry := range e.Region.Industries {
+	// 	 totalWealth += industry.Money
+	// }
 
 	wealthChange := totalWealth - e.InitialState.TotalWealth
 

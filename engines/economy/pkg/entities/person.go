@@ -22,12 +22,12 @@ func NewPopulationSegment(name string, problems []*Problem, size int) *Populatio
 type Person struct {
 	Name       string
 	Segments   []*PopulationSegment // A person can belong to multiple segments
-	Money      float64              // Personal wealth
-	LaborHours float64              // Available labor hours per time unit
+	Money      float32              // Personal wealth
+	LaborHours float32              // Available labor hours per time unit
 }
 
 // NewPerson creates a new Person instance
-func NewPerson(name string, initialMoney, laborHours float64) *Person {
+func NewPerson(name string, initialMoney, laborHours float32) *Person {
 	return &Person{
 		Name:       name,
 		Segments:   make([]*PopulationSegment, 0),

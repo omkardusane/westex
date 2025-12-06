@@ -69,7 +69,7 @@ pkg/model/                        ← Package directory
 
 ```go
 // calculateTotalWealth is unexported (lowercase)
-func calculateTotalWealth(region *Region) float64 {
+func calculateTotalWealth(region *Region) float32 {
     total := 0.0
     for _, person := range region.People {
         total += person.Money
@@ -78,7 +78,7 @@ func calculateTotalWealth(region *Region) float64 {
 }
 
 // GetTotalWealth is exported (uppercase) - public API
-func (r *Region) GetTotalWealth() float64 {
+func (r *Region) GetTotalWealth() float32 {
     return calculateTotalWealth(r)
 }
 ```
@@ -122,12 +122,12 @@ Look at `pkg/model/resource.go`:
 
 ```go
 // Pointer receiver - modifies the resource
-func (r *Resource) Add(amount float64) {
+func (r *Resource) Add(amount float32) {
     r.Quantity += amount  // Changes persist
 }
 
 // Pointer receiver - modifies the resource
-func (r *Resource) Consume(amount float64) bool {
+func (r *Resource) Consume(amount float32) bool {
     if r.Quantity >= amount {
         r.Quantity -= amount  // Changes persist
         return true
@@ -142,12 +142,12 @@ func (r *Resource) Consume(amount float64) bool {
 
 ```go
 // CanAfford checks if person can afford a purchase (value receiver - read-only)
-func (p Person) CanAfford(amount float64) bool {
+func (p Person) CanAfford(amount float32) bool {
     return p.Money >= amount
 }
 
 // Spend deducts money from person (pointer receiver - modifies)
-func (p *Person) Spend(amount float64) error {
+func (p *Person) Spend(amount float32) error {
     if !p.CanAfford(amount) {
         return fmt.Errorf("insufficient funds: has %.2f, needs %.2f", p.Money, amount)
     }
@@ -198,8 +198,8 @@ if errors.Is(err, ErrNotFound) {
 ```go
 // Define custom error type
 type InsufficientFundsError struct {
-    Available float64
-    Required  float64
+    Available float32
+    Required  float32
 }
 
 func (e *InsufficientFundsError) Error() string {
@@ -208,7 +208,7 @@ func (e *InsufficientFundsError) Error() string {
 }
 
 // Usage
-func (p *Person) Buy(amount float64) error {
+func (p *Person) Buy(amount float32) error {
     if p.Money < amount {
         return &InsufficientFundsError{
             Available: p.Money,
@@ -496,7 +496,7 @@ type Logger interface {
 }
 
 // Update Engine constructor
-func NewEngine(region *model.Region, logger logging.Logger, wagePerHour, pricePerUnit, productionRate float64) *Engine {
+func NewEngine(region *model.Region, logger logging.Logger, wagePerHour, pricePerUnit, productionRate float32) *Engine {
     return &Engine{
         Region:         region,
         Logger:         logger,  // Injected!
@@ -520,9 +520,9 @@ func NewEngine(region *model.Region, logger logging.Logger, wagePerHour, pricePe
 func TestCalculateWage(t *testing.T) {
     tests := []struct {
         name     string
-        hours    float64
-        rate     float64
-        expected float64
+        hours    float32
+        rate     float32
+        expected float32
     }{
         {"standard day", 8.0, 10.0, 80.0},
         {"overtime", 12.0, 10.0, 120.0},
@@ -553,10 +553,10 @@ import "testing"
 func TestResource_Consume(t *testing.T) {
     tests := []struct {
         name            string
-        initialQuantity float64
-        consumeAmount   float64
+        initialQuantity float32
+        consumeAmount   float32
         expectSuccess   bool
-        expectedRemaining float64
+        expectedRemaining float32
     }{
         {"sufficient", 100.0, 50.0, true, 50.0},
         {"exact amount", 100.0, 100.0, true, 0.0},

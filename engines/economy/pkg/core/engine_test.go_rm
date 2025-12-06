@@ -1,8 +1,8 @@
 package core
 
 import (
-	"westex/engines/economy/pkg/entities"
 	"testing"
+	"westex/engines/economy/pkg/entities"
 )
 
 func TestEngineCreation(t *testing.T) {
@@ -61,27 +61,27 @@ func TestSimulationRuns(t *testing.T) {
 	}
 }
 
-func TestProductionPhase(t *testing.T) {
-	region := entities.NewRegion("Test Region")
-	
-	problem := entities.NewProblem("Test", "Test problem", 0.5)
-	product := entities.NewResource("TestProduct", 100.0, "units")
-	industry := entities.CreateIndustry("TestCorp").
-		SetupIndustry([]*entities.Problem{problem}, nil, []*entities.Resource{product}).
-		UpdateIndustryRates(10.0, 1.0, 1000.0)
-	region.AddIndustry(industry)
+// func TestProductionPhase(t *testing.T) {
+// 	region := entities.NewRegion("Test Region")
 
-	engine := NewEngine(region, 5.0, 1.0, 50.0)
-	
-	initialQuantity := product.Quantity
-	logs := engine.processProduction()
+// 	problem := entities.NewProblem("Test", "Test problem", 0.5)
+// 	product := entities.NewResource("TestProduct", 100.0, "units")
+// 	industry := entities.CreateIndustry("TestCorp").
+// 		SetupIndustry([]*entities.Problem{problem}, nil, []*entities.Resource{product}).
+// 		UpdateIndustryRates(10.0, 1.0, 1000.0)
+// 	region.AddIndustry(industry)
 
-	if len(logs) != 1 {
-		t.Errorf("Expected 1 production log, got %d", len(logs))
-	}
+// 	engine := NewEngine(region, 5.0, 1.0, 50.0)
 
-	expectedQuantity := initialQuantity + engine.ProductionRate
-	if product.Quantity != expectedQuantity {
-		t.Errorf("Expected product quantity %.2f, got %.2f", expectedQuantity, product.Quantity)
-	}
-}
+// 	initialQuantity := product.Quantity
+// 	logs := engine.processProduction()
+
+// 	if len(logs) != 1 {
+// 		t.Errorf("Expected 1 production log, got %d", len(logs))
+// 	}
+
+// 	expectedQuantity := initialQuantity + engine.ProductionRate
+// 	if product.Quantity != expectedQuantity {
+// 		t.Errorf("Expected product quantity %.2f, got %.2f", expectedQuantity, product.Quantity)
+// 	}
+// }

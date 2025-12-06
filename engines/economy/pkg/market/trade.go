@@ -10,12 +10,12 @@ type TradeTransaction struct {
 	Buyer    *entities.Person
 	Seller   *entities.Industry
 	Product  *entities.Resource
-	Quantity float64
-	Price    float64 // Total price
+	Quantity float32
+	Price    float32 // Total price
 }
 
 // ExecuteTradeTransaction processes a person buying products from an industry
-func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, productName string, quantity float64, pricePerUnit float64) (bool, string) {
+func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, productName string, quantity float32, pricePerUnit float32) (bool, string) {
 	// Find the product in industry's output
 	var product *entities.Resource
 	for _, p := range seller.OutputProducts {
@@ -53,9 +53,9 @@ func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, 
 }
 
 // ProcessProductMarket simulates people buying products to solve their problems
-func ProcessProductMarket(region *entities.Region, pricePerUnit float64) []string {
+func ProcessProductMarket(region *entities.Region, pricePerUnit float32) []string {
 	logs := make([]string, 0)
-	var summary map[string]float64 = make(map[string]float64)
+	var summary map[string]float32 = make(map[string]float32)
 	// For each person, try to buy products that solve their problems
 	for _, person := range region.People {
 		problems := person.GetAllProblems()

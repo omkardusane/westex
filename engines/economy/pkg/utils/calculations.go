@@ -2,9 +2,9 @@ package utils
 
 import "math/rand/v2"
 
-// makeRandomFloat64 generates a random float64 between min and max
-func makeRandomFloat64(min, max float64) float64 {
-	return min + (max-min)*rand.Float64()
+// makeRandomfloat32 generates a random float32 between min and max
+func makeRandomfloat32(min, max float32) float32 {
+	return min + (max-min)*rand.Float32()
 }
 
 func ProbableChance(probablity float32) bool {

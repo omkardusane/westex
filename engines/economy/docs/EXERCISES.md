@@ -32,7 +32,7 @@ Add wealth calculation to `Region` with proper encapsulation.
 // Add these methods to the Region struct
 
 // calculateIndustryWealth is unexported - internal helper
-func calculateIndustryWealth(industries []*Industry) float64 {
+func calculateIndustryWealth(industries []*Industry) float32 {
     total := 0.0
     for _, industry := range industries {
         total += industry.Money
@@ -41,7 +41,7 @@ func calculateIndustryWealth(industries []*Industry) float64 {
 }
 
 // calculatePeopleWealth is unexported - internal helper
-func calculatePeopleWealth(people []*Person) float64 {
+func calculatePeopleWealth(people []*Person) float32 {
     total := 0.0
     for _, person := range people {
         total += person.Money
@@ -50,15 +50,15 @@ func calculatePeopleWealth(people []*Person) float64 {
 }
 
 // GetTotalWealth is exported - public API
-func (r *Region) GetTotalWealth() float64 {
+func (r *Region) GetTotalWealth() float32 {
     industryWealth := calculateIndustryWealth(r.Industries)
     peopleWealth := calculatePeopleWealth(r.People)
     return industryWealth + peopleWealth
 }
 
 // GetWealthDistribution is exported - returns breakdown
-func (r *Region) GetWealthDistribution() map[string]float64 {
-    return map[string]float64{
+func (r *Region) GetWealthDistribution() map[string]float32 {
+    return map[string]float32{
         "industries": calculateIndustryWealth(r.Industries),
         "people":     calculatePeopleWealth(r.People),
         "total":      r.GetTotalWealth(),
@@ -130,22 +130,22 @@ func (p Person) GetFullInfo() string {
 }
 
 // CanAfford checks affordability (value receiver - read-only)
-func (p Person) CanAfford(amount float64) bool {
+func (p Person) CanAfford(amount float32) bool {
     return p.Money >= amount
 }
 
 // HasLaborAvailable checks labor availability (value receiver)
-func (p Person) HasLaborAvailable(hours float64) bool {
+func (p Person) HasLaborAvailable(hours float32) bool {
     return p.LaborHours >= hours
 }
 
 // EarnMoney adds money (pointer receiver - modifies)
-func (p *Person) EarnMoney(amount float64) {
+func (p *Person) EarnMoney(amount float32) {
     p.Money += amount
 }
 
 // SpendMoney deducts money with validation (pointer receiver)
-func (p *Person) SpendMoney(amount float64) error {
+func (p *Person) SpendMoney(amount float32) error {
     if !p.CanAfford(amount) {
         return fmt.Errorf("%s cannot afford $%.2f (has $%.2f)", 
             p.Name, amount, p.Money)
@@ -155,7 +155,7 @@ func (p *Person) SpendMoney(amount float64) error {
 }
 
 // WorkHours deducts labor hours (pointer receiver)
-func (p *Person) WorkHours(hours float64) error {
+func (p *Person) WorkHours(hours float32) error {
     if !p.HasLaborAvailable(hours) {
         return fmt.Errorf("%s doesn't have %.2f hours available (has %.2f)", 
             p.Name, hours, p.LaborHours)
@@ -165,7 +165,7 @@ func (p *Person) WorkHours(hours float64) error {
 }
 
 // ResetLaborHours sets labor hours to default (pointer receiver)
-func (p *Person) ResetLaborHours(hours float64) {
+func (p *Person) ResetLaborHours(hours float32) {
     p.LaborHours = hours
 }
 ```
@@ -239,7 +239,7 @@ func TestPerson_PointerReceivers(t *testing.T) {
 ### Experiment
 Try changing `SpendMoney` to a value receiver:
 ```go
-func (p Person) SpendMoney(amount float64) error {
+func (p Person) SpendMoney(amount float32) error {
     p.Money -= amount  // This won't persist!
     return nil
 }
@@ -269,8 +269,8 @@ import "fmt"
 // InsufficientFundsError represents a lack of money
 type InsufficientFundsError struct {
     Entity    string
-    Available float64
-    Required  float64
+    Available float32
+    Required  float32
 }
 
 func (e *InsufficientFundsError) Error() string {
@@ -281,8 +281,8 @@ func (e *InsufficientFundsError) Error() string {
 // InsufficientLaborError represents a lack of labor hours
 type InsufficientLaborError struct {
     PersonName string
-    Available  float64
-    Required   float64
+    Available  float32
+    Required   float32
 }
 
 func (e *InsufficientLaborError) Error() string {
@@ -293,8 +293,8 @@ func (e *InsufficientLaborError) Error() string {
 // InsufficientResourceError represents a lack of resources
 type InsufficientResourceError struct {
     ResourceName string
-    Available    float64
-    Required     float64
+    Available    float32
+    Required     float32
 }
 
 func (e *InsufficientResourceError) Error() string {
@@ -319,7 +319,7 @@ func (e *NotFoundError) Error() string {
 
 ```go
 // Update SpendMoney to use custom error
-func (p *Person) SpendMoney(amount float64) error {
+func (p *Person) SpendMoney(amount float32) error {
     if !p.CanAfford(amount) {
         return &InsufficientFundsError{
             Entity:    p.Name,
@@ -332,7 +332,7 @@ func (p *Person) SpendMoney(amount float64) error {
 }
 
 // Update WorkHours to use custom error
-func (p *Person) WorkHours(hours float64) error {
+func (p *Person) WorkHours(hours float32) error {
     if !p.HasLaborAvailable(hours) {
         return &InsufficientLaborError{
             PersonName: p.Name,
@@ -351,7 +351,7 @@ func (p *Person) WorkHours(hours float64) error {
 
 ```go
 // Update Consume to return error instead of bool
-func (r *Resource) Consume(amount float64) error {
+func (r *Resource) Consume(amount float32) error {
     if r.Quantity < amount {
         return &InsufficientResourceError{
             ResourceName: r.Name,
@@ -425,7 +425,7 @@ func TestInsufficientResourceError(t *testing.T) {
 Update to use custom errors and handle them:
 
 ```go
-func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, productName string, quantity float64, pricePerUnit float64) (bool, string) {
+func ExecuteTradeTransaction(buyer *entities.Person, seller *entities.Industry, productName string, quantity float32, pricePerUnit float32) (bool, string) {
     // Find product
     var product *entities.Resource
     for _, p := range seller.OutputProducts {
@@ -495,13 +495,13 @@ type SimulationEngine interface {
 
 // ProductionSystem handles production logic
 type ProductionSystem interface {
-    ProduceGoods(industries []*entities.Industry, rate float64) []string
+    ProduceGoods(industries []*entities.Industry, rate float32) []string
 }
 
 // MarketSystem handles market transactions
 type MarketSystem interface {
-    ProcessLaborMarket(region *entities.Region, wageRate float64) []string
-    ProcessProductMarket(region *entities.Region, priceRate float64) []string
+    ProcessLaborMarket(region *entities.Region, wageRate float32) []string
+    ProcessProductMarket(region *entities.Region, priceRate float32) []string
 }
 
 // Verify Engine implements SimulationEngine at compile time
@@ -708,7 +708,7 @@ func NewEngine(
     logger logging.Logger,  // Interface, not concrete type!
     wagePerHour,
     pricePerUnit,
-    productionRate float64,
+    productionRate float32,
 ) *Engine {
     // If no logger provided, use a default
     if logger == nil {

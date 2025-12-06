@@ -40,8 +40,9 @@ func (i *Industry) UpdateIndustryRates(laborNeeded, consumptionRate, productionR
 	return i
 }
 
-func (i *Industry) UpdateLabor(laborNeeded float32) {
+func (i *Industry) UpdateLabor(laborNeeded float32) *Industry {
 	i.LaborNeeded = laborNeeded
+	return i
 }
 
 func (i *Industry) UpdateConsumptionRate(consumptionRate float32) {
