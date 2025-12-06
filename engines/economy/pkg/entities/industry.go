@@ -58,3 +58,9 @@ func (i *Industry) UpdateIndustryMoney(amount float32) *Industry {
 	i.Money += amount
 	return i
 }
+
+// SetInitialCapital sets the starting capital for the industry
+func (i *Industry) SetInitialCapital(amount float32) *Industry {
+	i.Money = amount
+	return i
+}

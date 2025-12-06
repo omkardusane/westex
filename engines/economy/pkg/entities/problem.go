@@ -7,6 +7,7 @@ type Problem struct {
 	Description string
 	Severity    float32 // 0.0 to 1.0, how critical this problem is
 	Demand      float32 // Calculated demand based on population sentiments
+	IsBasicNeed bool    // true for survival needs (food, water), false for pleasures (entertainment)
 }
 
 // NewProblem creates a new Problem instance

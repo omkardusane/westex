@@ -1,0 +1,105 @@
+# Mumbai Region Configuration
+
+region:
+  name: "Mumbai"
+  description: "A bustling metropolitan economy with diverse industries"
+
+# Problems/Needs in the economy
+problems:
+  - name: "Food"
+    description: "Need for sustenance and nutrition"
+    demand: 0.99  # 99% of population needs food
+    basic_need: true
+    
+  - name: "Healthcare"
+    description: "Need for medical services and wellness"
+    demand: 0.10  # 10% need healthcare at any given time
+    basic_need: true
+    
+  - name: "Entertainment"
+    description: "Need for leisure and fun"
+    demand: 0.20  # 20% seek entertainment
+    basic_need: false
+
+# Resources in the economy
+resources:
+  - name: "RawMaterial"
+    unit: "units"
+    initial_quantity: 10000
+    is_free: false
+    regeneration_rate: 0
+    
+  - name: "Land"
+    unit: "acres"
+    initial_quantity: 5000
+    is_free: true
+    regeneration_rate: 0
+    
+  - name: "Water"
+    unit: "liters"
+    initial_quantity: 100000
+    is_free: true
+    regeneration_rate: 1000  # Regenerates 1000 liters per tick
+
+# Industries
+industries:
+  - name: "Agriculture Industry"
+    solves_problems:
+      - "Food"
+    input_resources:
+      - "RawMaterial"
+      - "Land"
+      - "Water"
+    output_resources:
+      - "Food"
+    labor_needed: 50  # Needs 50 workers
+    initial_capital: 50000
+    
+  - name: "Health Industry"
+    solves_problems:
+      - "Healthcare"
+    input_resources:
+      - "RawMaterial"
+    output_resources:
+      - "Medical"
+      - "Wellness"
+    labor_needed: 30  # Needs 30 workers
+    initial_capital: 40000
+    
+  - name: "Entertainment Industry"
+    solves_problems:
+      - "Entertainment"
+    input_resources:
+      - "RawMaterial"
+    output_resources:
+      - "Entertainment"
+    labor_needed: 20  # Needs 20 workers
+    initial_capital: 30000
+
+# Population configuration
+population:
+  total_size: 1000
+  segments:
+    - name: "Workers"
+      percentage: 0.20  # 20% are workers (200 people)
+      has_problems: []  # Workers don't have special problems
+      initial_money: 100
+      labor_hours: 8
+      
+    - name: "General Population"
+      percentage: 0.80  # 80% are general population (800 people)
+      has_problems:
+        - "Food"
+        - "Healthcare"
+        - "Entertainment"
+      initial_money: 50
+      labor_hours: 0  # Non-workers
+
+# Simulation parameters
+simulation:
+  ticks: 10
+  weeks_per_tick: 4
+  hours_per_week: 40
+  wage_per_hour: 10.0
+  profit_margin: 0.10  # 10% markup
+  consumption_factor_per_week: 1.0
