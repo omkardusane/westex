@@ -9,7 +9,6 @@ import (
 
 func main() {
 	sim2()
-
 }
 
 func sim2() {

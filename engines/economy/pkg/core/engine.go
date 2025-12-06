@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 	"westex/engines/economy/pkg/entities"
 	"westex/engines/economy/pkg/logging"
@@ -29,6 +30,14 @@ type Engine struct {
 	PricePerUnit   float64 // Standard price per unit of product
 	ProductionRate float64 // How much each industry produces per tick
 	InitialState   *InitialState
+}
+
+type TickData struct {
+	TickNumber       int
+	WeeksCount	  int
+	ProducedGoods    []ProducedGoods
+	LaborEmployments []LaborEmployment
+
 }
 
 // InitialState captures the starting state of the economy
@@ -96,13 +105,17 @@ func (e *Engine) Run(ticks int) {
 // processTick handles one simulation tick
 func (e *Engine) processTick() {
 	e.Logger.LogTick(e.CurrentTick)
-	weeks := 1
+	weeks := 4                   // Assuming each tick represents 4 weeks
 	hours := float32(weeks * 40) // Assuming 40-hour work weeks
+	TickContext := TickData{
+		TickNumber:    e.CurrentTick,
+		WeeksCount: weeks,
+	}
 
 	// Phase 1: Industries produce goods
 	e.Logger.LogEvent("📦 PRODUCTION PHASE")
-	productionLogs := e.processProduction(hours)
-	e.Logger.LogEvents(productionLogs)
+	TickContext.ProducedGoods := e.processProduction(hours)
+	// e.Logger.LogEvents(productionLogs)
 
 	// Phase 2: Labor market - people work for industries
 	e.Logger.LogEvent("\n💼 LABOR MARKET PHASE")
@@ -118,31 +131,57 @@ func (e *Engine) processTick() {
 	e.resetLaborHours()
 }
 
+type ProducedGoods struct {
+	IndustryName     string
+	ProductName      string
+	Quantity         float32
+	ProductionRate   float32
+	ProductionTarget float32
+}
+
+type LaborEmployment struct {
+	Quantity     float32
+	IndustryName string
+}
+
 // processProduction simulates industries producing goods
-func (e *Engine) processProduction(hours float32) []string {
-	logs := make([]string, 0)
+func (e *Engine) processProduction(hours float32) []ProducedGoods {
+	logIt := func(logLine string) {
+		e.Logger.LogEvent(logLine)
+	}
+	pGoodsList := []ProducedGoods{}
 	for _, industry := range e.Region.Industries {
-		var LaborEmployed float32 = float32(0.3) * float32(len(e.Region.People)) // 30% of population employed
-		var productionTargets map[string]float32                                 // consumer need
-		var totalProductionNeed float32
+		pGoods := &ProducedGoods{
+			IndustryName: industry.Name,
+		}
+		LaborUtilized := LaborEmployment{
+			IndustryName: industry.Name,
+		}
+		var LaborEmployed float32 = float32(0.3 * ) * float32(len(e.Region.People)) // 30% of population employed
+		LaborUtilized.Quantity = LaborEmployed
+		var productionTargets map[string]float32 // consumer need
+		//var totalProductionNeed float32
 		//hours / industry.LaborNeeded
 		for _, problem := range industry.OwnedProblems {
 			peopleNeedingProduct := float32(len(e.Region.People)) * float32(problem.Demand)
 			productionTargets[problem.Name] = peopleNeedingProduct // estimated need
-			totalProductionNeed += peopleNeedingProduct
+			//totalProductionNeed += peopleNeedingProduct
+			pGoods.ProductionTarget = peopleNeedingProduct
 		}
 		for _, product := range industry.OutputProducts {
+			pGoods.ProductName = product.Name
 			// product.Add(e.ProductionRate)
 			// productionPerPerson := float32(1.0) //unit per person
-			// productionTarget := float32(totalProductionNeed) * productionPerPerson
-			productionPossiblePerTick := float32(LaborEmployed * hours / industry.LaborNeeded) // units per tick
-			produced := productionPossiblePerTick
-			logs = append(logs, fmt.Sprintf("✓ %s produced %.2f units of %s",
-				industry.Name, produced, product.Name))
+			// productionTarget := float32(pGoods.productionTarget) * productionPerPerson
+			pGoods.ProductionRate = float32(LaborEmployed / industry.LaborNeeded)
+			pGoods.Quantity = float32(pGoods.ProductionRate * hours) // units per tick
+			// produced := productionPossiblePerTick
+			logIt(fmt.Sprintf("✓ %s produced %.2f units of %s",
+				industry.Name, pGoods.Quantity, product.Name))
 		}
+		pGoodsList = append(pGoodsList, *pGoods)
 	}
-
-	return logs
+	return pGoodsList
 }
 
 // resetLaborHours resets everyone's labor hours for the next tick
