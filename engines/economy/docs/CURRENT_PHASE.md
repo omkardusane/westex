@@ -1,580 +1,446 @@
-# 🎯 Current Phase: Production with Labor Payments
+# 🎯 Current Phase: Pricing & Product Market
 
-**Phase**: 2.1 - Production Phase  
-**Duration**: Week 1 (7 days)  
-**Status**: In Progress  
+**Phase**: 2.2 & 3.1 - Pricing System and Product Market  
+**Duration**: Week 2 (7 days)  
+**Status**: Ready to Start  
+**Previous Phase**: ✅ Phase 2.1 COMPLETED (see PHASE_2_1_COMPLETION.md)
 
 ---
 
 ## 📋 Overview
 
-**Goal**: Complete the production phase where industries:
-1. Hire workers and pay wages immediately
-2. Consume input resources
-3. Produce output goods
-4. Track production costs
+**Goal**: Implement pricing based on production costs and enable people to buy products, completing the economic cycle.
 
-**Why this matters**: This creates the foundation of the economic cycle. Workers earn money, which they'll later spend on goods.
+**Why this matters**: This closes the loop - workers earn wages, then spend money on products, which gives industries revenue to pay more wages.
 
 ---
 
-## ✅ Tasks Breakdown
+## ✅ Phase 2.1 Completion Summary
 
-### **Task 1: Extract Production Calculation** (Day 1)
+All tasks from Phase 2.1 are **COMPLETE**:
+- ✅ Production calculation extracted and tested
+- ✅ Labor payments implemented (immediate, before production)
+- ✅ Resource consumption with validation
+- ✅ Production history tracking for cost analysis
+- ✅ Initial industry funding
+- ✅ All tests passing (7/7)
+
+See `PHASE_2_1_COMPLETION.md` for full details.
+
+---
+
+## 🎯 Phase 2.2: Pricing System (Days 1-3)
+
+### Task 1: Cost-Plus Pricing (Day 1)
 **Priority**: High  
-**Estimated Time**: 2 hours
+**Estimated Time**: 3 hours
 
 #### What to do:
-Create a clean, testable function for production calculations.
+Implement automatic pricing based on production costs + 10% markup.
 
 #### Implementation:
 
-**File**: `pkg/production/calculator.go` (new file)
+**File**: `pkg/pricing/calculator.go` (new file)
 
 ```go
-package production
+package pricing
 
 import "westex/engines/economy/pkg/entities"
 
-// ProductionResult contains the outcome of production calculation
-type ProductionResult struct {
-    UnitsProduced    float32
-    LaborUsed        float32
-    LaborCost        float32
-    ResourceCost     float32
-    TotalCost        float32
-    CostPerUnit      float32
+// PricingStrategy defines how prices are calculated
+type PricingStrategy string
+
+const (
+	CostPlus    PricingStrategy = "cost_plus"    // Cost + fixed markup
+	MarketBased PricingStrategy = "market_based" // Supply/demand
+)
+
+// PriceCalculator calculates product prices
+type PriceCalculator struct {
+	Strategy     PricingStrategy
+	MarkupRate   float32 // e.g., 0.10 for 10%
+	MinimumPrice float32 // Floor price
 }
 
-// CalculateProduction determines how much can be produced given constraints
-func CalculateProduction(
-    industry *entities.Industry,
-    availableLabor float32,
-    availableHours float32,
-    wageRate float32,
-) *ProductionResult {
-    result := &ProductionResult{}
-    
-    // Calculate labor utilization
-    laborNeeded := industry.LaborNeeded
-    laborUsed := min(availableLabor, laborNeeded)
-    result.LaborUsed = laborUsed
-    
-    // Calculate production capacity
-    productionRate := laborUsed / laborNeeded
-    hoursUsed := productionRate * availableHours
-    
-    // Units produced (simplified: 1 unit per hour of effective labor)
-    result.UnitsProduced = hoursUsed
-    
-    // Calculate costs
-    result.LaborCost = laborUsed * wageRate * availableHours
-    result.ResourceCost = calculateResourceCost(industry)
-    result.TotalCost = result.LaborCost + result.ResourceCost
-    
-    if result.UnitsProduced > 0 {
-        result.CostPerUnit = result.TotalCost / result.UnitsProduced
-    }
-    
-    return result
+// NewPriceCalculator creates a calculator with cost-plus strategy
+func NewPriceCalculator(markupRate float32) *PriceCalculator {
+	return &PriceCalculator{
+		Strategy:     CostPlus,
+		MarkupRate:   markupRate,
+		MinimumPrice: 1.0,
+	}
 }
 
-func calculateResourceCost(industry *entities.Industry) float32 {
-    // TODO: Calculate based on input resources consumed
-    // For now, return 0 (will implement in Task 3)
-    return 0
+// CalculatePrice determines the selling price for a product
+func (pc *PriceCalculator) CalculatePrice(industry *entities.Industry) float32 {
+	switch pc.Strategy {
+	case CostPlus:
+		return pc.calculateCostPlusPrice(industry)
+	default:
+		return pc.MinimumPrice
+	}
 }
 
-func min(a, b float32) float32 {
-    if a < b {
-        return a
-    }
-    return b
+func (pc *PriceCalculator) calculateCostPlusPrice(industry *entities.Industry) float32 {
+	// Get average production cost
+	avgCost := industry.GetAverageCostPerUnit()
+	
+	// If no history, use last cost or minimum
+	if avgCost == 0 {
+		avgCost = industry.GetLastProductionCost()
+	}
+	if avgCost == 0 {
+		return pc.MinimumPrice
+	}
+	
+	// Apply markup
+	price := avgCost * (1.0 + pc.MarkupRate)
+	
+	// Enforce minimum
+	if price < pc.MinimumPrice {
+		price = pc.MinimumPrice
+	}
+	
+	return price
 }
 ```
 
-#### Testing:
-
-**File**: `pkg/production/calculator_test.go`
+**File**: `pkg/entities/industry.go` (add field)
 
 ```go
-package production
-
-import (
-    "testing"
-    "westex/engines/economy/pkg/entities"
-)
-
-func TestCalculateProduction(t *testing.T) {
-    // Create test industry
-    industry := entities.CreateIndustry("TestCorp").
-        UpdateLabor(10.0) // Needs 10 workers
-    
-    // Test with sufficient labor
-    result := CalculateProduction(industry, 10.0, 40.0, 10.0)
-    
-    if result.LaborUsed != 10.0 {
-        t.Errorf("Expected 10 workers used, got %.2f", result.LaborUsed)
-    }
-    
-    expectedCost := 10.0 * 10.0 * 40.0 // workers * wage * hours
-    if result.LaborCost != expectedCost {
-        t.Errorf("Expected labor cost %.2f, got %.2f", expectedCost, result.LaborCost)
-    }
-}
-
-func TestCalculateProduction_InsufficientLabor(t *testing.T) {
-    industry := entities.CreateIndustry("TestCorp").
-        UpdateLabor(10.0)
-    
-    // Only 5 workers available
-    result := CalculateProduction(industry, 5.0, 40.0, 10.0)
-    
-    if result.LaborUsed != 5.0 {
-        t.Errorf("Expected 5 workers used, got %.2f", result.LaborUsed)
-    }
-    
-    // Production should be half of full capacity
-    expectedProduction := 5.0 / 10.0 * 40.0 // 20 units
-    if result.UnitsProduced != expectedProduction {
-        t.Errorf("Expected %.2f units, got %.2f", expectedProduction, result.UnitsProduced)
-    }
+type Industry struct {
+	// ... existing fields ...
+	ProductPrice float32 // Current selling price per unit
 }
 ```
 
 ---
 
-### **Task 2: Implement Labor Payments** (Day 2)
-**Priority**: Critical  
-**Estimated Time**: 3 hours
-
-#### What to do:
-During production, immediately pay workers their wages.
-
-#### Implementation:
-
-**File**: `pkg/production/labor.go` (new file)
-
-```go
-package production
-
-import (
-    "fmt"
-    "westex/engines/economy/pkg/entities"
-)
-
-// LaborPayment represents a wage payment to a worker
-type LaborPayment struct {
-    PersonName   string
-    IndustryName string
-    HoursWorked  float32
-    WageRate     float32
-    TotalPaid    float32
-}
-
-// PayWorkers distributes wages to workers employed by an industry
-func PayWorkers(
-    industry *entities.Industry,
-    workers []*entities.Person,
-    hoursPerWorker float32,
-    wageRate float32,
-) ([]LaborPayment, error) {
-    payments := make([]LaborPayment, 0)
-    totalWages := float32(0)
-    
-    // Calculate total wages needed
-    for _, worker := range workers {
-        wages := hoursPerWorker * wageRate
-        totalWages += wages
-    }
-    
-    // Check if industry can afford
-    if industry.Money < totalWages {
-        return nil, fmt.Errorf("industry %s cannot afford wages: needs %.2f, has %.2f",
-            industry.Name, totalWages, industry.Money)
-    }
-    
-    // Pay each worker
-    for _, worker := range workers {
-        wages := hoursPerWorker * wageRate
-        
-        // Deduct from industry
-        industry.Money -= wages
-        
-        // Pay worker
-        worker.Money += wages
-        
-        // Record payment
-        payments = append(payments, LaborPayment{
-            PersonName:   worker.Name,
-            IndustryName: industry.Name,
-            HoursWorked:  hoursPerWorker,
-            WageRate:     wageRate,
-            TotalPaid:    wages,
-        })
-    }
-    
-    return payments, nil
-}
-
-// AllocateWorkers assigns workers to an industry based on labor needs
-func AllocateWorkers(
-    industry *entities.Industry,
-    availableWorkers []*entities.Person,
-) []*entities.Person {
-    needed := int(industry.LaborNeeded)
-    available := len(availableWorkers)
-    
-    // Take minimum of needed and available
-    count := needed
-    if available < needed {
-        count = available
-    }
-    
-    return availableWorkers[:count]
-}
-```
-
-#### Update Engine:
-
-**File**: `pkg/core/engine.go`
-
-```go
-import "westex/engines/economy/pkg/production"
-
-func (e *Engine) processProduction(hours float32) []ProducedGoods {
-    pGoodsList := []ProducedGoods{}
-    
-    // Get available workers (from worker population segment)
-    availableWorkers := e.getAvailableWorkers()
-    
-    for _, industry := range e.Region.Industries {
-        // Allocate workers to this industry
-        workers := production.AllocateWorkers(industry, availableWorkers)
-        
-        // Calculate production
-        result := production.CalculateProduction(
-            industry,
-            float32(len(workers)),
-            hours,
-            SimConf.WagePerHour,
-        )
-        
-        // Pay workers immediately
-        payments, err := production.PayWorkers(
-            industry,
-            workers,
-            hours,
-            SimConf.WagePerHour,
-        )
-        
-        if err != nil {
-            e.Logger.LogEvent(fmt.Sprintf("❌ %s", err.Error()))
-            continue
-        }
-        
-        // Log payments
-        e.Logger.LogEvent(fmt.Sprintf("💰 %s paid %.2f in wages to %d workers",
-            industry.Name, result.LaborCost, len(workers)))
-        
-        // Produce goods
-        for _, product := range industry.OutputProducts {
-            product.Add(result.UnitsProduced)
-            
-            pGoodsList = append(pGoodsList, ProducedGoods{
-                IndustryName:     industry.Name,
-                ProductName:      product.Name,
-                Quantity:         result.UnitsProduced,
-                ProductionRate:   result.LaborUsed / industry.LaborNeeded,
-                ProductionTarget: 0, // Will calculate from demand
-            })
-        }
-        
-        // Remove allocated workers from available pool
-        availableWorkers = availableWorkers[len(workers):]
-    }
-    
-    return pGoodsList
-}
-
-func (e *Engine) getAvailableWorkers() []*entities.Person {
-    workers := make([]*entities.Person, 0)
-    
-    // Find worker population segment
-    for _, segment := range e.Region.PopulationSegments {
-        if segment.Name == "Workers" {
-            // Get all people in this segment
-            for _, person := range e.Region.People {
-                for _, personSegment := range person.Segments {
-                    if personSegment.Name == segment.Name {
-                        workers = append(workers, person)
-                        break
-                    }
-                }
-            }
-            break
-        }
-    }
-    
-    return workers
-}
-```
-
----
-
-### **Task 3: Resource Consumption** (Day 3-4)
+### Task 2: Price Updates (Day 2)
 **Priority**: High  
-**Estimated Time**: 4 hours
-
-#### What to do:
-Industries consume input resources when producing.
-
-#### Implementation:
-
-**File**: `pkg/production/resources.go` (new file)
-
-```go
-package production
-
-import (
-    "fmt"
-    "westex/engines/economy/pkg/entities"
-)
-
-// ResourceConsumption tracks resources used in production
-type ResourceConsumption struct {
-    ResourceName string
-    Quantity     float32
-    Cost         float32
-}
-
-// ConsumeResources deducts input resources needed for production
-func ConsumeResources(
-    industry *entities.Industry,
-    unitsToProdu float32,
-    resourceCostPerUnit map[string]float32,
-) ([]ResourceConsumption, error) {
-    consumptions := make([]ResourceConsumption, 0)
-    
-    // For each input resource
-    for _, input := range industry.InputResources {
-        // Calculate how much needed (simplified: 1 input per 1 output)
-        needed := unitsToProdu
-        
-        // Check availability
-        if input.Quantity < needed {
-            return nil, fmt.Errorf("insufficient %s: need %.2f, have %.2f",
-                input.Name, needed, input.Quantity)
-        }
-        
-        // Consume
-        err := input.Consume(needed)
-        if err != nil {
-            return nil, err
-        }
-        
-        // Calculate cost
-        costPerUnit := resourceCostPerUnit[input.Name]
-        if costPerUnit == 0 {
-            costPerUnit = 1.0 // Default cost
-        }
-        
-        consumptions = append(consumptions, ResourceConsumption{
-            ResourceName: input.Name,
-            Quantity:     needed,
-            Cost:         needed * costPerUnit,
-        })
-    }
-    
-    return consumptions, nil
-}
-```
-
-#### Update Calculator:
-
-**File**: `pkg/production/calculator.go`
-
-```go
-func calculateResourceCost(industry *entities.Industry) float32 {
-    totalCost := float32(0)
-    
-    // Simplified: assume each input resource costs 1.0 per unit
-    for _, input := range industry.InputResources {
-        // In future, this will be actual market price
-        costPerUnit := float32(1.0)
-        totalCost += costPerUnit
-    }
-    
-    return totalCost
-}
-```
-
----
-
-### **Task 4: Track Production Costs** (Day 5)
-**Priority**: Medium  
 **Estimated Time**: 2 hours
 
 #### What to do:
-Store historical production costs for pricing calculations.
+Update prices each tick based on latest production costs.
 
 #### Implementation:
 
-**File**: `pkg/entities/industry.go`
+**File**: `pkg/core/engine_new.go`
 
-Add to Industry struct:
+Add new phase after production:
+
 ```go
-type Industry struct {
-    // ... existing fields ...
-    
-    ProductionHistory []ProductionRecord
+func (e *Engine) processTick() {
+	e.Logger.LogTick(e.CurrentTick)
+	
+	hoursAvailable := float32(e.WeeksPerTick) * e.HoursPerWeek
+	
+	// Phase 1: Production (includes labor payments)
+	e.Logger.LogEvent("📦 PRODUCTION PHASE")
+	e.processProductionPhase(hoursAvailable)
+	
+	// Phase 2: Pricing (update based on costs)
+	e.Logger.LogEvent("\n💰 PRICING PHASE")
+	e.processPricingPhase()
+	
+	// Phase 3: Resource regeneration
+	e.Logger.LogEvent("\n🌱 RESOURCE REGENERATION")
+	e.processResourceRegeneration()
 }
 
-type ProductionRecord struct {
-    Tick            int
-    UnitsProduced   float32
-    TotalCost       float32
-    CostPerUnit     float32
-    LaborCost       float32
-    ResourceCost    float32
-}
-
-func (i *Industry) RecordProduction(record ProductionRecord) {
-    i.ProductionHistory = append(i.ProductionHistory, record)
-    
-    // Keep only last 10 records
-    if len(i.ProductionHistory) > 10 {
-        i.ProductionHistory = i.ProductionHistory[1:]
-    }
-}
-
-func (i *Industry) GetAverageCostPerUnit() float32 {
-    if len(i.ProductionHistory) == 0 {
-        return 0
-    }
-    
-    total := float32(0)
-    for _, record := range i.ProductionHistory {
-        total += record.CostPerUnit
-    }
-    
-    return total / float32(len(i.ProductionHistory))
+func (e *Engine) processPricingPhase() {
+	priceCalc := pricing.NewPriceCalculator(0.10) // 10% markup
+	
+	for _, industry := range e.Region.Industries {
+		newPrice := priceCalc.CalculatePrice(industry)
+		oldPrice := industry.ProductPrice
+		industry.ProductPrice = newPrice
+		
+		e.Logger.LogEvent(fmt.Sprintf("💵 %s: $%.2f → $%.2f (based on avg cost $%.2f)",
+			industry.Name, oldPrice, newPrice, industry.GetAverageCostPerUnit()))
+	}
 }
 ```
 
 ---
 
-### **Task 5: Initial Industry Funding** (Day 6)
-**Priority**: Critical  
+### Task 3: Price Display (Day 3)
+**Priority**: Medium  
 **Estimated Time**: 1 hour
 
 #### What to do:
-Industries need starting capital to pay first round of wages.
+Show prices in logs and final summary.
 
 #### Implementation:
 
-**File**: `pkg/entities/industry.go`
+Update production logging to show price:
 
 ```go
-func (i *Industry) SetInitialCapital(amount float32) *Industry {
-    i.Money = amount
-    return i
-}
+e.Logger.LogEvent(fmt.Sprintf("📊 Total cost: $%.2f, Price: $%.2f (%.0f%% markup)",
+	result.TotalCost, industry.ProductPrice, 
+	((industry.ProductPrice/result.CostPerUnit)-1)*100))
 ```
 
-**File**: `cmd/sim-cli/main.go`
+Update final summary:
 
 ```go
-foodIndustry := entities.CreateIndustry("Agriculture Industry").
-    SetupIndustry([]*entities.Problem{foodProblem}, inputs, outputs).
-    UpdateLabor(float32(4.0)).
-    SetInitialCapital(10000.0) // Starting capital
+fmt.Printf("    Current Price: $%.2f/unit\n", industry.ProductPrice)
+fmt.Printf("    Potential Revenue: $%.2f (if all sold)\n", 
+	industry.ProductPrice * totalUnitsProduced)
 ```
 
 ---
 
-### **Task 6: Testing & Balancing** (Day 7)
+## 🛒 Phase 3.1: Product Market (Days 4-7)
+
+### Task 4: Needs-Based Purchasing (Day 4-5)
+**Priority**: Critical  
+**Estimated Time**: 4 hours
+
+#### What to do:
+People buy products to satisfy their needs.
+
+#### Implementation:
+
+**File**: `pkg/market/product_market.go` (new file)
+
+```go
+package market
+
+import (
+	"westex/engines/economy/pkg/entities"
+)
+
+// Purchase represents a transaction
+type Purchase struct {
+	PersonName   string
+	IndustryName string
+	ProductName  string
+	Quantity     float32
+	TotalCost    float32
+}
+
+// ProcessProductMarket handles people buying products
+func ProcessProductMarket(
+	region *entities.Region,
+) []Purchase {
+	purchases := make([]Purchase, 0)
+	
+	// For each person
+	for _, person := range region.People {
+		// Identify their needs
+		needs := getPersonNeeds(person)
+		
+		// For each need, try to buy products
+		for _, need := range needs {
+			// Find industries that solve this need
+			for _, industry := range region.Industries {
+				if solvesProblem(industry, need) {
+					// Try to buy
+					purchase := attemptPurchase(person, industry, need)
+					if purchase != nil {
+						purchases = append(purchases, *purchase)
+					}
+				}
+			}
+		}
+	}
+	
+	return purchases
+}
+
+func getPersonNeeds(person *entities.Person) []*entities.Problem {
+	needs := make([]*entities.Problem, 0)
+	for _, segment := range person.Segments {
+		needs = append(needs, segment.Problems...)
+	}
+	return needs
+}
+
+func solvesProblem(industry *entities.Industry, problem *entities.Problem) bool {
+	for _, p := range industry.OwnedProblems {
+		if p.Name == problem.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func attemptPurchase(
+	person *entities.Person,
+	industry *entities.Industry,
+	need *entities.Problem,
+) *Purchase {
+	// Check if industry has products
+	if len(industry.OutputProducts) == 0 {
+		return nil
+	}
+	
+	product := industry.OutputProducts[0] // Simplified: take first product
+	price := industry.ProductPrice
+	
+	// Check if person can afford
+	if person.Money < price {
+		return nil
+	}
+	
+	// Check if product available
+	if product.Quantity < 1.0 {
+		return nil
+	}
+	
+	// Make purchase
+	quantity := float32(1.0) // Buy 1 unit
+	cost := price * quantity
+	
+	person.Money -= cost
+	industry.Money += cost
+	product.Consume(quantity)
+	
+	return &Purchase{
+		PersonName:   person.Name,
+		IndustryName: industry.Name,
+		ProductName:  product.Name,
+		Quantity:     quantity,
+		TotalCost:    cost,
+	}
+}
+```
+
+---
+
+### Task 5: Needs Satisfaction Tracking (Day 6)
+**Priority**: Medium  
+**Estimated Time**: 3 hours
+
+#### What to do:
+Track which needs are satisfied and which aren't.
+
+#### Implementation:
+
+**File**: `pkg/entities/person.go` (add fields)
+
+```go
+type Person struct {
+	// ... existing fields ...
+	SatisfiedNeeds   map[string]int // Problem name → ticks since satisfied
+	UnsatisfiedNeeds map[string]int // Problem name → ticks unsatisfied
+}
+
+func (p *Person) SatisfyNeed(problemName string) {
+	if p.SatisfiedNeeds == nil {
+		p.SatisfiedNeeds = make(map[string]int)
+	}
+	p.SatisfiedNeeds[problemName] = 0
+	delete(p.UnsatisfiedNeeds, problemName)
+}
+
+func (p *Person) IncrementUnsatisfiedNeeds() {
+	if p.UnsatisfiedNeeds == nil {
+		p.UnsatisfiedNeeds = make(map[string]int)
+	}
+	
+	// For each problem in segments
+	for _, segment := range p.Segments {
+		for _, problem := range segment.Problems {
+			if _, satisfied := p.SatisfiedNeeds[problem.Name]; !satisfied {
+				p.UnsatisfiedNeeds[problem.Name]++
+			}
+		}
+	}
+}
+```
+
+---
+
+### Task 6: Integration & Testing (Day 7)
 **Priority**: High  
 **Estimated Time**: 3 hours
 
 #### What to do:
-Test the complete production cycle and balance parameters.
+Integrate product market into engine and test complete cycle.
 
-#### Test Scenarios:
+#### Implementation:
 
-1. **Sufficient Labor & Resources**
-   - Expected: Full production, all workers paid
-   
-2. **Insufficient Labor**
-   - Expected: Reduced production, some workers unemployed
-   
-3. **Insufficient Resources**
-   - Expected: Production halts, error logged
-   
-4. **Industry Bankruptcy**
-   - Expected: Cannot pay wages, production stops
+**File**: `pkg/core/engine_new.go`
 
-#### Parameters to Balance:
-- Initial industry capital
-- Wage rates
-- Labor requirements per industry
-- Resource consumption rates
-- Production rates
+```go
+func (e *Engine) processTick() {
+	// ... existing phases ...
+	
+	// Phase 4: Product Market
+	e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
+	e.processProductMarket()
+	
+	// Phase 5: Needs tracking
+	e.updateNeedsSatisfaction()
+}
+
+func (e *Engine) processProductMarket() {
+	purchases := market.ProcessProductMarket(e.Region)
+	
+	totalSpent := float32(0)
+	for _, purchase := range purchases {
+		totalSpent += purchase.TotalCost
+		e.Logger.LogEvent(fmt.Sprintf("🛍️  %s bought %.0f %s for $%.2f from %s",
+			purchase.PersonName, purchase.Quantity, purchase.ProductName,
+			purchase.TotalCost, purchase.IndustryName))
+	}
+	
+	e.Logger.LogEvent(fmt.Sprintf("\n📊 MARKET SUMMARY: %d purchases, $%.2f spent",
+		len(purchases), totalSpent))
+}
+```
 
 ---
 
 ## 📊 Success Criteria
 
-By end of Week 1, you should have:
+By end of Week 2, you should have:
 
-✅ **Working production phase** where:
-- Industries hire workers
-- Workers get paid immediately
-- Resources are consumed
-- Goods are produced
-- Costs are tracked
+✅ **Pricing System** where:
+- Prices automatically calculated from production costs
+- 10% markup applied
+- Prices update each tick
 
-✅ **Clean code** with:
-- Extracted, testable functions
-- Proper error handling
-- Clear logging
+✅ **Product Market** where:
+- People buy products based on needs
+- Money flows: Industry → Workers → Industry
+- Products are consumed
 
-✅ **Balanced parameters** where:
-- Industries can afford wages
-- Production rates are realistic
-- Economy doesn't immediately collapse
+✅ **Complete Economic Cycle**:
+```
+Tick 1: Produce → Pay Workers → Update Prices → Workers Buy → Needs Satisfied
+Tick 2: Produce (with revenue) → Pay Workers → ...
+```
+
+✅ **Sustainable Economy**:
+- Industries earn revenue from sales
+- Revenue covers future wage costs
+- Workers can afford basic needs
 
 ---
 
 ## 🐛 Common Issues & Solutions
 
-### Issue 1: Industries run out of money
-**Solution**: Increase initial capital or reduce wage rates
+### Issue 1: Industries run out of products
+**Solution**: Increase production rates or reduce population
 
-### Issue 2: No workers available
-**Solution**: Increase worker population segment size
+### Issue 2: People can't afford products
+**Solution**: Lower prices or increase wages
 
-### Issue 3: Resource depletion too fast
-**Solution**: Increase initial resource quantities or reduce consumption rate
-
----
-
-## 📝 Notes
-
-- Keep production logic separate from engine logic
-- Use dependency injection for testability
-- Log everything for debugging
-- Don't worry about optimization yet - focus on correctness
+### Issue 3: Industries lose money despite sales
+**Solution**: Check markup rate (should be > 0.10 for profit)
 
 ---
 
-## 🔜 Next Week Preview
+## 🔜 After This Phase
 
-**Week 2** will focus on:
-- Pricing system (cost + 10%)
-- Product market (people buying goods)
-- Needs satisfaction tracking
+**Phase 4**: Survival & Mortality
+- Poverty mechanics
+- Death from unsatisfied basic needs
+- Population dynamics
 
 ---
 
-**Let's build this step by step. Start with Task 1 today!** 🚀
+**Ready to implement pricing and product market!** 🚀

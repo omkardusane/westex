@@ -188,6 +188,16 @@ func (e *Engine) processProductionPhase(hoursAvailable float32) {
 		e.Logger.LogEvent(fmt.Sprintf("📊 Total cost: $%.2f (Labor: $%.2f, Resources: $%.2f, Per unit: $%.2f)",
 			result.TotalCost, result.LaborCost, result.ResourceCost, result.CostPerUnit))
 
+		// Record production history for cost tracking
+		industry.RecordProduction(entities.ProductionRecord{
+			Tick:          e.CurrentTick,
+			UnitsProduced: result.UnitsProduced,
+			TotalCost:     result.TotalCost,
+			CostPerUnit:   result.CostPerUnit,
+			LaborCost:     result.LaborCost,
+			ResourceCost:  result.ResourceCost,
+		})
+
 		// Remove allocated workers from available pool
 		availableWorkers = availableWorkers[len(workers):]
 	}
@@ -259,6 +269,14 @@ func (e *Engine) printFinalSummary() {
 		fmt.Printf("    Products:\n")
 		for _, product := range industry.OutputProducts {
 			fmt.Printf("      - %s: %.2f %s\n", product.Name, product.Quantity, product.Unit)
+		}
+		// Show production cost history
+		if len(industry.ProductionHistory) > 0 {
+			avgCost := industry.GetAverageCostPerUnit()
+			lastCost := industry.GetLastProductionCost()
+			fmt.Printf("    Production History: %d records\n", len(industry.ProductionHistory))
+			fmt.Printf("      Average cost/unit: $%.2f\n", avgCost)
+			fmt.Printf("      Last cost/unit: $%.2f\n", lastCost)
 		}
 	}
 

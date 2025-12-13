@@ -1,0 +1,120 @@
+go run ./cmd/sim-cli
+
+
+🚀 Starting Economy Simulation for 3 ticks...
+Region: Mumbai
+Industries: 2, People: 1000, Problems: 2
+Wage Rate: $10.00/hour, Weeks/Tick: 4, Hours/Week: 40
+
+
+========== TICK 1 [17:38:46] ==========
+  📦 PRODUCTION PHASE
+  Available workers: 168
+  
+--- Agriculture Industry ---
+  Allocated 4 workers (needs 4)
+  Production capacity: 100.0% (4/4 workers)
+  💰 Paid $6400.00 in wages to 4 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Food (total: 160.00)
+  📊 Total cost: $6560.00 (Labor: $6400.00, Resources: $160.00, Per unit: $41.00)
+  
+--- Health Industry ---
+  Allocated 10 workers (needs 10)
+  Production capacity: 100.0% (10/10 workers)
+  💰 Paid $16000.00 in wages to 10 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Wellness (total: 160.00)
+  ✅ Produced 160.00 Medical (total: 160.00)
+  📊 Total cost: $16160.00 (Labor: $16000.00, Resources: $160.00, Per unit: $101.00)
+  
+📈 PRODUCTION SUMMARY: 480.00 units produced, $22400.00 paid in wages
+  ⚠️  154 workers unemployed this tick
+  
+🌱 RESOURCE REGENERATION
+  No renewable resources
+
+========== TICK 2 [17:38:46] ==========
+  📦 PRODUCTION PHASE
+  Available workers: 168
+  
+--- Agriculture Industry ---
+  Allocated 4 workers (needs 4)
+  Production capacity: 100.0% (4/4 workers)
+  💰 Paid $6400.00 in wages to 4 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Food (total: 320.00)
+  📊 Total cost: $6560.00 (Labor: $6400.00, Resources: $160.00, Per unit: $41.00)
+  
+--- Health Industry ---
+  Allocated 10 workers (needs 10)
+  Production capacity: 100.0% (10/10 workers)
+  💰 Paid $16000.00 in wages to 10 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Wellness (total: 320.00)
+  ✅ Produced 160.00 Medical (total: 320.00)
+  📊 Total cost: $16160.00 (Labor: $16000.00, Resources: $160.00, Per unit: $101.00)
+  
+📈 PRODUCTION SUMMARY: 480.00 units produced, $22400.00 paid in wages
+  ⚠️  154 workers unemployed this tick
+  
+🌱 RESOURCE REGENERATION
+  No renewable resources
+
+========== TICK 3 [17:38:46] ==========
+  📦 PRODUCTION PHASE
+  Available workers: 168
+  
+--- Agriculture Industry ---
+  Allocated 4 workers (needs 4)
+  Production capacity: 100.0% (4/4 workers)
+  💰 Paid $6400.00 in wages to 4 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Food (total: 480.00)
+  📊 Total cost: $6560.00 (Labor: $6400.00, Resources: $160.00, Per unit: $41.00)
+  
+--- Health Industry ---
+  Allocated 10 workers (needs 10)
+  Production capacity: 100.0% (10/10 workers)
+  💰 Paid $16000.00 in wages to 10 workers
+  📉 Consumed 160.00 RawMaterial (cost: $160.00)
+  ✅ Produced 160.00 Wellness (total: 480.00)
+  ✅ Produced 160.00 Medical (total: 480.00)
+  📊 Total cost: $16160.00 (Labor: $16000.00, Resources: $160.00, Per unit: $101.00)
+  
+📈 PRODUCTION SUMMARY: 480.00 units produced, $22400.00 paid in wages
+  ⚠️  154 workers unemployed this tick
+  
+🌱 RESOURCE REGENERATION
+  No renewable resources
+
+
+═══════════════════════════════════════
+📊 FINAL SIMULATION SUMMARY
+═══════════════════════════════════════
+
+🏭 INDUSTRIES:
+  Agriculture Industry:
+    Money: $30800.00 (Start: $50000.00, Change: -19200.00)
+    Products:
+      - Food: 480.00 kg
+  Health Industry:
+    Money: $32000.00 (Start: $80000.00, Change: -48000.00)
+    Products:
+      - Wellness: 480.00 visits
+      - Medical: 480.00 treatments
+
+👥 PEOPLE (showing first 5):
+  Person-1: $50.00 (Start: $50.00, Change: +0.00)
+  Person-2: $50.00 (Start: $50.00, Change: +0.00)
+  Person-3: $4850.00 (Start: $50.00, Change: +4800.00)
+  Person-4: $50.00 (Start: $50.00, Change: +0.00)
+  Person-5: $50.00 (Start: $50.00, Change: +0.00)
+  ... and 995 more
+
+💰 TOTAL WEALTH: $180000.00 (Start: $180000.00, Change: +0.00)
+
+📦 RESOURCES:
+  RawMaterial: 9040.00 units
+
+✅ Simulation completed successfully!

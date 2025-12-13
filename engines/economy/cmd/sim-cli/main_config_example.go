@@ -19,7 +19,7 @@ func mainConfigExample() {
 }
 
 func runFromConfig() {
-	fmt.Println("=== Running simulation from config file ===\n")
+	fmt.Println("=== Running simulation from config file ===")
 
 	// Load configuration
 	cfg, err := config.LoadConfig("configs/mumbai.yaml")

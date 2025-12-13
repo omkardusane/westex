@@ -75,3 +75,35 @@ func (i *Industry) SetInitialCapital(amount float32) *Industry {
 	i.Money = amount
 	return i
 }
+
+// RecordProduction adds a production record to history
+func (i *Industry) RecordProduction(record ProductionRecord) {
+	i.ProductionHistory = append(i.ProductionHistory, record)
+
+	// Keep only last 10 records to avoid unbounded growth
+	if len(i.ProductionHistory) > 10 {
+		i.ProductionHistory = i.ProductionHistory[1:]
+	}
+}
+
+// GetAverageCostPerUnit calculates the average cost per unit from recent production
+func (i *Industry) GetAverageCostPerUnit() float32 {
+	if len(i.ProductionHistory) == 0 {
+		return 0
+	}
+
+	total := float32(0)
+	for _, record := range i.ProductionHistory {
+		total += record.CostPerUnit
+	}
+
+	return total / float32(len(i.ProductionHistory))
+}
+
+// GetLastProductionCost returns the most recent production cost per unit
+func (i *Industry) GetLastProductionCost() float32 {
+	if len(i.ProductionHistory) == 0 {
+		return 0
+	}
+	return i.ProductionHistory[len(i.ProductionHistory)-1].CostPerUnit
+}
