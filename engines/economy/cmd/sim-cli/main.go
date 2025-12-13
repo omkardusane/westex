@@ -26,11 +26,15 @@ func sim2() {
 	// Create industries using builder pattern
 
 	rawMaterial := entities.NewResource("RawMaterial", "units")
+	rawMaterial.Quantity = 10000 // Initial supply
+	region.AddResource(rawMaterial)
+
 	// Industry 1: Food Production (solves food problem)
 	foodProduct := entities.NewResource("Food", "kg")
 	foodIndustry := entities.CreateIndustry("Agriculture Industry").
 		SetupIndustry([]*entities.Problem{foodProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{foodProduct}).
-		UpdateLabor(float32(4.0))
+		UpdateLabor(float32(4.0)).
+		SetInitialCapital(50000.0) // Starting capital for wages
 	region.AddIndustry(foodIndustry)
 
 	// Industry 2: Healthcare Services (solves healthcare problem)
@@ -38,7 +42,8 @@ func sim2() {
 	healthcareServices := entities.NewResource("Medical", "treatments")
 	healthcareIndustry := entities.CreateIndustry("Health Industry").
 		SetupIndustry([]*entities.Problem{healthCareProblem}, []*entities.Resource{rawMaterial}, []*entities.Resource{wellnessServices, healthcareServices}).
-		UpdateLabor(float32(10))
+		UpdateLabor(float32(10)).
+		SetInitialCapital(80000.0) // Starting capital for wages
 	region.AddIndustry(healthcareIndustry)
 
 	// Create population segments
@@ -128,13 +133,13 @@ func sim1() {
 	}
 
 	// Create and run the simulation engine
-	engine := core.NewEngine(
+	engine := core.NewEngineWithParams(
 		region,
 		10.0, // Wage per hour: $10
-		2.0,  // Price per unit: $2
-		50.0, // Production rate: 50 units per tick
+		4,    // Weeks per tick
+		40.0, // Hours per week
 	)
 
-	// Run for 10 ticks
+	// Run for 3 ticks
 	engine.Run(3)
 }

@@ -8,7 +8,9 @@ import (
 	"westex/engines/economy/pkg/core"
 )
 
-func main() {
+// mainConfigExample demonstrates loading configuration from YAML
+// To use this, rename to main() and comment out the main() in main.go
+func mainConfigExample() {
 	// Example 1: Load from config file
 	runFromConfig()
 

@@ -2,15 +2,26 @@ package entities
 
 // Industry represents a business entity that produces goods/services
 type Industry struct {
-	Name            string
-	OwnedProblems   []*Problem  // Problems this industry solves (1-2 problems)
-	InputResources  []*Resource // Resources needed for production
-	OutputProducts  []*Resource // Products produced
-	LaborNeeded     float32     // Hours of labor needed per time unit
-	ConsumptionRate float32     // Rate at which input resources are consumed per unit labor week
-	ProductionRate  float32     // Rate at which output products are produced per unit labor hour
-	Money           float32     // Money owned by the industry
-	LaborEmployed   float32     // Number of laborers employed per tick
+	Name              string
+	OwnedProblems     []*Problem  // Problems this industry solves (1-2 problems)
+	InputResources    []*Resource // Resources needed for production
+	OutputProducts    []*Resource // Products produced
+	LaborNeeded       float32     // Hours of labor needed per time unit
+	ConsumptionRate   float32     // Rate at which input resources are consumed per unit labor week
+	ProductionRate    float32     // Rate at which output products are produced per unit labor hour
+	Money             float32     // Money owned by the industry
+	LaborEmployed     float32     // Number of laborers employed per tick
+	ProductionHistory []ProductionRecord
+}
+
+// ProductionRecord tracks historical production data for cost analysis
+type ProductionRecord struct {
+	Tick          int
+	UnitsProduced float32
+	TotalCost     float32
+	CostPerUnit   float32
+	LaborCost     float32
+	ResourceCost  float32
 }
 
 // CreateIndustry sets up the industry with name and returns a new Industry instance
