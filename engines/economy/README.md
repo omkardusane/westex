@@ -56,7 +56,7 @@ Each tick of the simulation runs through these phases:
 
 ```bash
 # Navigate to the project directory
-cd d:\code4\westex\engines\economy
+cd ./westex/engines/economy
 
 # Run the simulation
 go run ./cmd/sim-cli
@@ -76,7 +76,7 @@ The simulation logs all interactions:
 - People buying products
 - Final economic summary with wealth distribution
 
-## 🎯 Learning Goals (Principal Architect Path)
+## 🎯 Project demonstrates
 
 This project demonstrates:
 

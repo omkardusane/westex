@@ -53,7 +53,7 @@ industries:
     output_resources:
       - "Food"
     labor_needed: 50  # Needs 50 workers
-    initial_capital: 50000
+    initial_capital: 200000  # Enough for ~2.5 ticks (50 workers × $10/hr × 40 hrs × 4 weeks = $80k per tick)
     
   - name: "Health Industry"
     solves_problems:
@@ -64,7 +64,7 @@ industries:
       - "Medical"
       - "Wellness"
     labor_needed: 30  # Needs 30 workers
-    initial_capital: 40000
+    initial_capital: 150000  # Enough for ~3 ticks (30 workers × $10/hr × 40 hrs × 4 weeks = $48k per tick)
     
   - name: "Entertainment Industry"
     solves_problems:
@@ -74,7 +74,7 @@ industries:
     output_resources:
       - "Entertainment"
     labor_needed: 20  # Needs 20 workers
-    initial_capital: 30000
+    initial_capital: 100000  # Enough for ~3 ticks (20 workers × $10/hr × 40 hrs × 4 weeks = $32k per tick)
 
 # Population configuration
 population:
