@@ -1,5 +1,7 @@
 package entities
 
+var personIDCounter = 0
+
 // PopulationSegment represents a group of people with shared characteristics
 // This defines a category of people who face similar problems
 // Examples: "Urban Workers", "Rural Farmers", "Students", "Retirees"
@@ -20,6 +22,7 @@ func NewPopulationSegment(name string, problems []*Problem, size int) *Populatio
 
 // Person represents an individual in the economy
 type Person struct {
+	ID         int
 	Name       string
 	Segments   []*PopulationSegment // A person can belong to multiple segments
 	Money      float32              // Personal wealth
@@ -28,7 +31,9 @@ type Person struct {
 
 // NewPerson creates a new Person instance
 func NewPerson(name string, initialMoney, laborHours float32) *Person {
+	personIDCounter++
 	return &Person{
+		ID:         personIDCounter,
 		Name:       name,
 		Segments:   make([]*PopulationSegment, 0),
 		Money:      initialMoney,

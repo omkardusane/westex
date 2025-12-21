@@ -1,8 +1,11 @@
 package entities
 
+var problemIDCounter = 0
+
 // Problem represents a high-level need or issue in the economy
 // Examples: food, water, entertainment, civil-infra
 type Problem struct {
+	ID          int
 	Name        string
 	Description string
 	Severity    float32 // 0.0 to 1.0, how critical this problem is
@@ -12,7 +15,9 @@ type Problem struct {
 
 // NewProblem creates a new Problem instance
 func NewProblem(name, description string, severity float32) *Problem {
+	problemIDCounter++
 	return &Problem{
+		ID:          problemIDCounter,
 		Name:        name,
 		Description: description,
 		Severity:    severity,

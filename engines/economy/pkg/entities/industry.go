@@ -1,7 +1,10 @@
 package entities
 
+var industryIDCounter = 0
+
 // Industry represents a business entity that produces goods/services
 type Industry struct {
+	ID                int
 	Name              string
 	OwnedProblems     []*Problem  // Problems this industry solves (1-2 problems)
 	InputResources    []*Resource // Resources needed for production
@@ -26,7 +29,9 @@ type ProductionRecord struct {
 
 // CreateIndustry sets up the industry with name and returns a new Industry instance
 func CreateIndustry(name string) *Industry {
+	industryIDCounter++
 	return &Industry{
+		ID:             industryIDCounter,
 		Name:           name,
 		OwnedProblems:  make([]*Problem, 0),
 		InputResources: make([]*Resource, 0),

@@ -27,7 +27,7 @@ resources:
     unit: "units"
     initial_quantity: 10000
     is_free: false
-    regeneration_rate: 0
+    regeneration_rate: 2500
     
   - name: "Land"
     unit: "acres"
@@ -87,7 +87,7 @@ population:
       labor_hours: 8
       
     - name: "General Population"
-      percentage: 0.80  # 80% are general population (800 people)
+      percentage: 1.00  # 80% are general population (800 people)
       has_problems:
         - "Food"
         - "Healthcare"
@@ -97,7 +97,7 @@ population:
 
 # Simulation parameters
 simulation:
-  ticks: 10
+  ticks: 2
   weeks_per_tick: 4
   hours_per_week: 40
   wage_per_hour: 10.0
