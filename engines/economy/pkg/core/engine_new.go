@@ -6,6 +6,7 @@ import (
 
 	"westex/engines/economy/pkg/entities"
 	"westex/engines/economy/pkg/logging"
+	"westex/engines/economy/pkg/market"
 	"westex/engines/economy/pkg/production"
 )
 
@@ -96,13 +97,13 @@ func (e *Engine) processTick() {
 	e.Logger.LogEvent("📦 PRODUCTION PHASE")
 	e.processProductionPhase(hoursAvailable)
 
-	// Phase 2: Resource regeneration
+	// Phase 2: Product Market (people buy goods)
+	e.Logger.LogEvent("\n🛒 PRODUCT MARKET PHASE")
+	e.processProductMarket()
+
+	// Phase 3: Resource regeneration
 	e.Logger.LogEvent("\n🌱 RESOURCE REGENERATION")
 	e.processResourceRegeneration()
-
-	// Future phases:
-	// Phase 3: Product market (people buy goods)
-	// Phase 4: Needs satisfaction tracking
 }
 
 // processProductionPhase handles production and labor payments
@@ -209,6 +210,38 @@ func (e *Engine) processProductionPhase(hoursAvailable float32) {
 	unemployed := len(e.getAvailableWorkers()) - len(availableWorkers)
 	if unemployed > 0 {
 		e.Logger.LogEvent(fmt.Sprintf("⚠️  %d workers unemployed this tick", len(availableWorkers)))
+	}
+}
+
+// processProductMarket handles people buying products
+func (e *Engine) processProductMarket() {
+	// Temporary: use simple fixed pricing
+	// TODO: Replace with cost-plus pricing based on production costs
+	pricePerUnit := float32(50.0)
+
+	result := market.ProcessProductMarket(e.Region, pricePerUnit)
+
+	// Log summary
+	e.Logger.LogEvent(fmt.Sprintf("💰 Total spent: $%.2f", result.TotalSpent))
+	e.Logger.LogEvent(fmt.Sprintf("📊 Purchases made: %d", len(result.Purchases)))
+	e.Logger.LogEvent(fmt.Sprintf("🏭 Industry revenue: $%.2f", result.TotalRevenue))
+	e.Logger.LogEvent(fmt.Sprintf("👥 People satisfied: %d, unsatisfied: %d",
+		result.PeopleSatisfied, result.PeopleUnsatisfied))
+
+	// Log sample purchases (first 5)
+	if len(result.Purchases) > 0 {
+		e.Logger.LogEvent("\nSample purchases:")
+		count := 0
+		for _, purchase := range result.Purchases {
+			if count >= 5 {
+				e.Logger.LogEvent(fmt.Sprintf("   ... and %d more purchases", len(result.Purchases)-5))
+				break
+			}
+			e.Logger.LogEvent(fmt.Sprintf("   🛍️  Person #%d bought %.0f %s for $%.2f (solving %s)",
+				purchase.PersonID, purchase.Quantity, purchase.ProductName,
+				purchase.TotalCost, purchase.ProblemSolved))
+			count++
+		}
 	}
 }
 
